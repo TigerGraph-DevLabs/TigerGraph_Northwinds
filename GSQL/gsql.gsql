@@ -1,0 +1,136 @@
+CREATE VERTEX Shipper(PRIMARY_ID id INT) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Employee(PRIMARY_ID id INT, lastName STRING, firstName STRING, birthDate DATETIME, hireDate DATETIME, photoPath STRING, salary FLOAT, notes STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX City(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Region(PRIMARY_ID id STRING, description STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX PostalCode(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Country(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Territory(PRIMARY_ID id STRING, description STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX CustomerOrder(PRIMARY_ID id INT, orderDate DATETIME, requiredDate DATETIME, shippedDate DATETIME, shipVia INT, freight STRING, shipName STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Address(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Title(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX TitleOfCourtesy(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Customer(PRIMARY_ID id STRING, contactName STRING, contactTitle STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Phone(PRIMARY_ID id STRING, extension STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Fax(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE"
+CREATE VERTEX Product(PRIMARY_ID id INT, productName STRING, qtyPerUnit STRING, unitPrice FLOAT, inStock INT, onOrder INT, reorderLevel INT, discontinued BOOL) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Category(PRIMARY_ID id INT, name STRING, description STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Company(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX CustomerType(PRIMARY_ID id STRING, customerDescription STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Supplier(PRIMARY_ID id INT, contactName STRING, contactTitle STRING, homePage STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE DIRECTED EDGE reports_to(FROM Employee, TO Employee) WITH REVERSE_EDGE="reverse_reports_to"
+CREATE UNDIRECTED EDGE in_territory(FROM Employee, TO Territory)
+CREATE UNDIRECTED EDGE to_region(FROM CustomerOrder, TO Region)
+CREATE UNDIRECTED EDGE to_country(FROM CustomerOrder, TO Country)
+CREATE UNDIRECTED EDGE to_postal_code(FROM CustomerOrder, TO PostalCode)
+CREATE UNDIRECTED EDGE to_city(FROM CustomerOrder, TO City)
+CREATE UNDIRECTED EDGE to_address(FROM CustomerOrder, TO Address)
+CREATE UNDIRECTED EDGE has_title(FROM Employee, TO Title)
+CREATE UNDIRECTED EDGE has_toc(FROM Employee, TO TitleOfCourtesy)
+CREATE UNDIRECTED EDGE placed_order(FROM Customer, TO CustomerOrder, orderDate DATETIME)
+CREATE UNDIRECTED EDGE is_category(FROM Product, TO Category)
+CREATE UNDIRECTED EDGE contains_product(FROM CustomerOrder, TO Product, unitPrice FLOAT, quantity INT, discount DOUBLE)
+CREATE UNDIRECTED EDGE ship_via(FROM CustomerOrder, TO Shipper)
+CREATE UNDIRECTED EDGE is_type(FROM Customer, TO CustomerType)
+CREATE UNDIRECTED EDGE in_city(FROM Employee, TO City|FROM Customer, TO City|FROM Supplier, TO City)
+CREATE UNDIRECTED EDGE in_region(FROM Territory, TO Region|FROM Employee, TO Region|FROM Customer, TO Region|FROM Supplier, TO Region)
+CREATE UNDIRECTED EDGE in_postal_code(FROM Employee, TO PostalCode|FROM Customer, TO PostalCode|FROM Supplier, TO PostalCode)
+CREATE UNDIRECTED EDGE in_country(FROM Employee, TO Country|FROM Customer, TO Country|FROM Supplier, TO Country)
+CREATE UNDIRECTED EDGE at_address(FROM Employee, TO Address|FROM Customer, TO Address|FROM Supplier, TO Address)
+CREATE UNDIRECTED EDGE has_fax(FROM Customer, TO Fax|FROM Supplier, TO Fax)
+CREATE UNDIRECTED EDGE has_phone(FROM Employee, TO Phone|FROM Customer, TO Phone|FROM Shipper, TO Phone|FROM Supplier, TO Phone)
+CREATE UNDIRECTED EDGE from_company(FROM Shipper, TO Company|FROM Supplier, TO Company)
+CREATE UNDIRECTED EDGE from_supplier(FROM Product, TO Supplier)
+CREATE UNDIRECTED EDGE facilitated_order(FROM CustomerOrder, TO Employee)
+
+CREATE GRAPH Northwind(Shipper, Employee, City, Region, PostalCode, Country, Territory, CustomerOrder, Address, Title, TitleOfCourtesy, Customer, Phone, Fax, Product, Category, Company, CustomerType, Supplier, reports_to, in_territory, to_region, to_country, to_postal_code, to_city, to_address, has_title, has_toc, placed_order, is_category, contains_product, ship_via, is_type, in_city, in_region, in_postal_code, in_country, at_address, has_fax, has_phone, from_company)
+
+CREATE LOADING JOB load_job_categories FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX Category VALUES($0, $1, $2) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+    }
+
+CREATE LOADING JOB load_job_customers FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX Customer VALUES($0, $2, $3) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE has_phone VALUES($0 Customer, $9 Phone) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE at_address VALUES($0 Customer, $4 Address) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_region VALUES($0 Customer, $6 Region) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_country VALUES($0 Customer, $8 Country) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_postal_code VALUES($0 Customer, $7 PostalCode) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_city VALUES($0 Customer, $5 City) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE has_fax VALUES($0 Customer, $10 Fax) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+    }
+
+CREATE LOADING JOB load_job_employee_territories FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO EDGE in_territory VALUES($0, $1) USING SEPARATOR="|", HEADER="true", EOL="\n";
+    }
+
+CREATE LOADING JOB load_job_order_details FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO EDGE contains_product VALUES($0, $1, $2, $3, $4) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+    }
+
+CREATE LOADING JOB load_job_employees FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX Employee VALUES($0, $1, $2, $5, $6, $17, _, $15) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE reports_to VALUES($0, $16) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE has_toc VALUES($0, $4) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE has_title VALUES($0, $3) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE has_phone VALUES($0 Employee, $12 Phone) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE at_address VALUES($0 Employee, $7 Address) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_region VALUES($0 Employee, $9 Region) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_country VALUES($0 Employee, $11 Country) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_postal_code VALUES($0 Employee, $10 PostalCode) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_city VALUES($0 Employee, $8 City) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+    }
+
+CREATE LOADING JOB load_job_orders FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX CustomerOrder VALUES($0, $3, $4, $5, $6, $7, $8) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE placed_order VALUES($1, $0, $3) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE ship_via VALUES($0, $6) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE to_city VALUES($0, $10) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE to_postal_code VALUES($0, $12) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE to_country VALUES($0, $13) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE to_region VALUES($0, $11) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE to_address VALUES($0, $9) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE facilitated_order VALUES($0, $2) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+    }
+
+CREATE LOADING JOB load_job_products FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX Product VALUES($0, $1, $4, $5, $6, $7, $8, $9) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE is_category VALUES($0, $3) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE from_supplier VALUES($0, $2) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+    }
+
+CREATE LOADING JOB load_job_regions FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX Region VALUES($0, $1) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+    }
+
+CREATE LOADING JOB load_job_shippers FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO EDGE from_company VALUES($0 Shipper, $1 Company) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE has_phone VALUES($0 Shipper, $2 Phone) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+    }
+
+CREATE LOADING JOB load_job_suppliers FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX Supplier VALUES($0, $2, $3, $11) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE has_fax VALUES($0 Supplier, $10 Fax) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_city VALUES($0 Supplier, $5 City) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_postal_code VALUES($0 Supplier, $7 PostalCode) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_country VALUES($0 Supplier, $8 Country) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_region VALUES($0 Supplier, $6 Region) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE at_address VALUES($0 Supplier, $4 Address) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE has_phone VALUES($0 Supplier, $9 Phone) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE from_company VALUES($0 Supplier, $1 Company) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+    }
+
+CREATE LOADING JOB load_job_territories FOR GRAPH Northwind {
+      DEFINE FILENAME MyDataSource;
+      LOAD MyDataSource TO VERTEX Territory VALUES($0, $1) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+      LOAD MyDataSource TO EDGE in_region VALUES($0 Territory, $2 Region) USING SEPARATOR="|", HEADER="true", EOL="\n", QUOTE="double";
+    }
