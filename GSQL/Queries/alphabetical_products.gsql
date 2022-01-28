@@ -1,0 +1,9 @@
+CREATE QUERY alphabetical_products() FOR GRAPH Northwind { 
+  products = {Product.*};
+  
+  results = SELECT p FROM products:p
+    ORDER BY
+      p.productName ASC;
+  
+  PRINT results;
+}

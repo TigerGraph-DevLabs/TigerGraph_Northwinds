@@ -1,0 +1,12 @@
+CREATE QUERY get_current_product_list() FOR GRAPH Northwind { 
+  
+  products = {Product.*};
+  
+  results = SELECT p FROM products:p
+    WHERE
+      p.discontinued == FALSE
+    ORDER BY
+      p.productName ASC;
+  
+  PRINT results [results.id, results.productName];
+}

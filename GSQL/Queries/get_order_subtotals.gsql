@@ -1,0 +1,12 @@
+CREATE QUERY get_order_subtotals(VERTEX<CustomerOrder> inOrder) FOR GRAPH Northwind { 
+  
+  SumAccum<FLOAT> @subtotal;
+  
+  thisOrder = {inOrder};
+  
+  results = SELECT o FROM thisOrder:o - (contains_product:e) - Product
+    ACCUM
+      o.@subtotal += e.unitPrice * e.quantity * (1.0 - e.discount);
+  
+  PRINT results [results.@subtotal] AS results;
+}

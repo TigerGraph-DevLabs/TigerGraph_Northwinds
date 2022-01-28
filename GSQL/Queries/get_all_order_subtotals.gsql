@@ -1,0 +1,12 @@
+CREATE QUERY get_all_order_subtotals() FOR GRAPH Northwind { 
+  
+  SumAccum<FLOAT> @subtotal;
+  
+  cust_orders = {CustomerOrder.*};
+  
+  results = SELECT c FROM cust_orders:c - (contains_product:e) - Product
+    ACCUM
+      c.@subtotal += e.unitPrice * e.quantity * (1.0 - e.discount);
+  
+  PRINT results [results.@subtotal] AS results;
+}

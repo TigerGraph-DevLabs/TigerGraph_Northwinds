@@ -1,0 +1,45 @@
+CREATE VERTEX Shipper(PRIMARY_ID id INT) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Employee(PRIMARY_ID id INT, lastName STRING, firstName STRING, birthDate DATETIME, hireDate DATETIME, photoPath STRING, salary FLOAT, notes STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX City(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Region(PRIMARY_ID id STRING, description STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX PostalCode(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Country(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Territory(PRIMARY_ID id STRING, description STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX CustomerOrder(PRIMARY_ID id INT, orderDate DATETIME, requiredDate DATETIME, shippedDate DATETIME, shipVia INT, freight STRING, shipName STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Address(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Title(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX TitleOfCourtesy(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Customer(PRIMARY_ID id STRING, contactName STRING, contactTitle STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Phone(PRIMARY_ID id STRING, extension STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Fax(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE"
+CREATE VERTEX Product(PRIMARY_ID id INT, productName STRING, qtyPerUnit STRING, unitPrice FLOAT, inStock INT, onOrder INT, reorderLevel INT, discontinued BOOL) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Category(PRIMARY_ID id INT, name STRING, description STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Company(PRIMARY_ID id STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX CustomerType(PRIMARY_ID id STRING, customerDescription STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE VERTEX Supplier(PRIMARY_ID id INT, contactName STRING, contactTitle STRING, homePage STRING) WITH STATS="OUTDEGREE_BY_EDGETYPE", PRIMARY_ID_AS_ATTRIBUTE="true"
+CREATE DIRECTED EDGE reports_to(FROM Employee, TO Employee) WITH REVERSE_EDGE="reverse_reports_to"
+CREATE UNDIRECTED EDGE in_territory(FROM Employee, TO Territory)
+CREATE UNDIRECTED EDGE to_region(FROM CustomerOrder, TO Region)
+CREATE UNDIRECTED EDGE to_country(FROM CustomerOrder, TO Country)
+CREATE UNDIRECTED EDGE to_postal_code(FROM CustomerOrder, TO PostalCode)
+CREATE UNDIRECTED EDGE to_city(FROM CustomerOrder, TO City)
+CREATE UNDIRECTED EDGE to_address(FROM CustomerOrder, TO Address)
+CREATE UNDIRECTED EDGE has_title(FROM Employee, TO Title)
+CREATE UNDIRECTED EDGE has_toc(FROM Employee, TO TitleOfCourtesy)
+CREATE UNDIRECTED EDGE placed_order(FROM Customer, TO CustomerOrder, orderDate DATETIME)
+CREATE UNDIRECTED EDGE is_category(FROM Product, TO Category)
+CREATE UNDIRECTED EDGE contains_product(FROM CustomerOrder, TO Product, unitPrice FLOAT, quantity INT, discount DOUBLE)
+CREATE UNDIRECTED EDGE ship_via(FROM CustomerOrder, TO Shipper)
+CREATE UNDIRECTED EDGE is_type(FROM Customer, TO CustomerType)
+CREATE UNDIRECTED EDGE in_city(FROM Employee, TO City|FROM Customer, TO City|FROM Supplier, TO City)
+CREATE UNDIRECTED EDGE in_region(FROM Territory, TO Region|FROM Employee, TO Region|FROM Customer, TO Region|FROM Supplier, TO Region)
+CREATE UNDIRECTED EDGE in_postal_code(FROM Employee, TO PostalCode|FROM Customer, TO PostalCode|FROM Supplier, TO PostalCode)
+CREATE UNDIRECTED EDGE in_country(FROM Employee, TO Country|FROM Customer, TO Country|FROM Supplier, TO Country)
+CREATE UNDIRECTED EDGE at_address(FROM Employee, TO Address|FROM Customer, TO Address|FROM Supplier, TO Address)
+CREATE UNDIRECTED EDGE has_fax(FROM Customer, TO Fax|FROM Supplier, TO Fax)
+CREATE UNDIRECTED EDGE has_phone(FROM Employee, TO Phone|FROM Customer, TO Phone|FROM Shipper, TO Phone|FROM Supplier, TO Phone)
+CREATE UNDIRECTED EDGE from_company(FROM Shipper, TO Company|FROM Supplier, TO Company)
+CREATE UNDIRECTED EDGE from_supplier(FROM Product, TO Supplier)
+CREATE UNDIRECTED EDGE facilitated_order(FROM CustomerOrder, TO Employee)
+
+CREATE GRAPH Northwind(Shipper, Employee, City, Region, PostalCode, Country, Territory, CustomerOrder, Address, Title, TitleOfCourtesy, Customer, Phone, Fax, Product, Category, Company, CustomerType, Supplier, reports_to, in_territory, to_region, to_country, to_postal_code, to_city, to_address, has_title, has_toc, placed_order, is_category, contains_product, ship_via, is_type, in_city, in_region, in_postal_code, in_country, at_address, has_fax, has_phone, from_company, from_supplier, facilitated_order)

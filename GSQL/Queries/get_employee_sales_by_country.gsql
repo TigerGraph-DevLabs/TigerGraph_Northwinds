@@ -1,0 +1,20 @@
+CREATE QUERY get_employee_sales_by_country(VERTEX<Country> in_cont) FOR GRAPH Northwind SYNTAX v2{ 
+  
+  country = {in_cont};
+  
+  SumAccum<FLOAT> @subtotal;
+  
+  orders = SELECT o FROM country:c - (to_country) - CustomerOrder:o;
+  
+  subs = SELECT o FROM orders:o - (contains_product:e) - Product
+    ACCUM
+      o.@subtotal += e.unitPrice * e.quantity * (1.0 - e.discount);
+    
+  results = SELECT e FROM country:c - (to_country) - CustomerOrder:o - (facilitated_order) - Employee:e
+    ACCUM
+      e.@subtotal += o.@subtotal;
+  
+  PRINT country;
+  PRINT results [results.firstName, results.lastName, results.@subtotal];
+  
+}

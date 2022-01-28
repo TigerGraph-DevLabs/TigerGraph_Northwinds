@@ -1,0 +1,16 @@
+CREATE QUERY get_sales_by_year(int in_year) FOR GRAPH Northwind { 
+
+  SumAccum<FLOAT> @subtotal;
+  
+  cust_orders = {CustomerOrder.*};
+  
+  results = SELECT o FROM cust_orders:o - (contains_product:e) - Product
+    WHERE
+      year(o.shippedDate) == in_year
+    ACCUM
+      o.@subtotal += e.unitPrice * e.quantity * (1.0 - e.discount)
+    ORDER BY
+      o.shippedDate;
+  
+  PRINT results [results.shippedDate, results.@subtotal, year(results.shippedDate)];
+}

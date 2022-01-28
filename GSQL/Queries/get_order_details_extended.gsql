@@ -1,0 +1,15 @@
+CREATE QUERY get_order_details_extended() FOR GRAPH Northwind { 
+  TYPEDEF TUPLE <INT product_id, STRING product_name, FLOAT unit_price, INT qty, FLOAT discnt, FLOAT ext_price> product_details;
+  c_order = {CustomerOrder.*};
+  
+  MapAccum<VERTEX<Product>, product_details> @extended_price;
+  
+  results = SELECT o FROM c_order:o - (:e) - Product:p
+    ACCUM
+      FLOAT extended_price = e.unitPrice * e.quantity * (1 - e.discount),
+      o.@extended_price += (p -> product_details(p.id, p.productName, e.unitPrice, e.quantity, e.discount, extended_price))
+    ORDER BY
+      o.id ASC;
+  
+  PRINT results [results.id, results.@extended_price];
+}
