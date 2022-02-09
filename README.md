@@ -101,7 +101,7 @@ CREATE QUERY get_sales_by_year(int in_year) FOR GRAPH Northwind {
 
 <hr>
 
-<!-- ### Employee Sales by Country
+### Employee Sales by Country
 
 #### SQL
 
@@ -145,7 +145,7 @@ CREATE QUERY get_employee_sales_by_country(VERTEX<Country> in_cont) FOR GRAPH No
 }
 ```
 
-<hr> -->
+<hr>
 
 ### Alphabetical List of Products
 Return a list of products in alphabetical order.
