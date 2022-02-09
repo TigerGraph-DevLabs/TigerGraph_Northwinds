@@ -1,13 +1,29 @@
 # TigerGraph Northwinds
 
 ## Overview
-This repo will give you two different methods for deploying the TigerGraph Northwinds demo.
+This repo will give you two different methods for deploying the TigerGraph Northwinds demo. All operations in TigerGraph get distilled down to GSQL. Regardless of whether you are using the GSQL command line, GraphStudio interface, or an outside connector, the GSQL being executed is the same.
 
 ### GSQL Method
-A series of Bash scripts will execute GSQL code to create the schema, load the data, and create the queries needed for the graph. This method will need to be executed on the TigerGraph server itself, or remotely via an exposed GSQL terminal.
+A series of Bash scripts will execute GSQL code to create the schema, load the data, and create the queries needed for the graph. This method will need to be executed on the TigerGraph server itself, or remotely via an exposed GSQL terminal. You can use the 'GSQL Access' feature of TigerGraph cloud to open a GSQL connection to your cloud Solution. Alternatively, you can use the [TigerGraph CLI](https://github.com/TigerGraph-DevLabs/TigerGraph-CLI) to interface with a cloud, or on-prem instance.
+
+**To Set Up**
+
+- Access the GSQL shell of your TigerGraph instance
+- From within this repo, run: `cd GSQL`
+- `bash create_graph.sh`
+- `bash load_data.sh`
+- If you wish to install the queries for REST access run: `bash install_queries.sh`
 
 ### Python Method
 This Jupyter notebook contains blocks of [pyTigerGraph](https://pytigergraph.github.io/pyTigerGraph/) code that will connect to your TigerGraph solution, create a schema, create a graph, load your data, and allow you to run queries.
+
+**To Set Up**
+
+- Ensure you have a [Jupyter](https://jupyter.org/) environment accessible either locally, or in the cloud
+- (Cloud Only) Clone this repository into your cloud environment using `git clone https://github.com/TigerGraph-DevLabs/TigerGraph_Northwinds.git`
+- Navigate into the **Python** directory `cd ./Python`
+- Start the notebook with `jupyter notebook setup.ipynb`
+- Follow along with the notebook.
 
 ## Queries
 
