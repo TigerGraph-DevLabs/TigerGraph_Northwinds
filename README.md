@@ -101,12 +101,23 @@ CREATE QUERY get_sales_by_year(int in_year) FOR GRAPH Northwind {
 
 <hr>
 
-### Employee Sales by Country
+<!-- ### Employee Sales by Country
 
 #### SQL
 
 ```sql
-
+WITH CTE_EmpRegion AS 
+(
+    SELECT EmployeeID, MAX(RegionID) RegionID
+    FROM dbo.EmployeeTerritories et 
+        INNER JOIN territories t ON t.TerritoryID = et.TerritoryID
+    GROUP BY EmployeeID
+)
+SELECT RegionID, SUM(Quantity * UnitPrice) 
+FROM Orders o 
+    INNER JOIN [Order Details] od ON o.OrderID = od.OrderID
+    INNER JOIN CTE_EmpRegion er ON o.EmployeeID = er.EmployeeID
+GROUP BY RegionID
 ```
 
 #### GSQL
@@ -134,7 +145,7 @@ CREATE QUERY get_employee_sales_by_country(VERTEX<Country> in_cont) FOR GRAPH No
 }
 ```
 
-<hr>
+<hr> -->
 
 ### Alphabetical List of Products
 Return a list of products in alphabetical order.
