@@ -1,5 +1,0 @@
-CREATE QUERY sales_by_category(INT in_year) FOR GRAPH Northwind { 
-  
-  results = SELECT 
-  
-}

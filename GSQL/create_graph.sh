@@ -10,4 +10,3 @@ gsql -g Northwind ./Queries/get_employee_sales_by_country.gsql
 gsql -g Northwind ./Queries/get_order_details_extended.gsql
 gsql -g Northwind ./Queries/get_order_subtotals.gsql
 gsql -g Northwind ./Queries/get_sales_by_year.gsql
-gsql -g Northwind ./Queries/sales_by_category.gsql

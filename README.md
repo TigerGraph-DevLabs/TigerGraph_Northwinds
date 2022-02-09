@@ -8,18 +8,18 @@ A series of Bash scripts will execute GSQL code to create the schema, load the d
 
 **To Set Up**
 
-- Access the GSQL shell of your TigerGraph instance
+- Access the terminal as the `tigergraph` user on your TigerGraph instance `su tigergraph` (default password is `tigergraph`)
 - From within this repo, run: `cd GSQL`
 - `bash create_graph.sh`
 - `bash load_data.sh`
 - If you wish to install the queries for REST access run: `bash install_queries.sh`
 
 ### Python Method
-This Jupyter notebook contains blocks of [pyTigerGraph](https://pytigergraph.github.io/pyTigerGraph/) code that will connect to your TigerGraph solution, create a schema, create a graph, load your data, and allow you to run queries.
+This Jupyter notebook contains blocks of [pyTigerGraph](https://pytigergraph.github.io/pyTigerGraph/) code that will connect to your TigerGraph solution, create a schema, create a graph, load your data, and allow you to run queries. While this is run in jupyter notebook in this example, you can use pyTigerGraph from your favorite python environment.
 
 **To Set Up**
 
-- Ensure you have a [Jupyter](https://jupyter.org/) environment accessible either locally, or in the cloud
+- Ensure you have a [Jupyter](https://jupyter.org/) environment accessible either locally, or in the cloud (`pip3 install notebook`)
 - (Cloud Only) Clone this repository into your cloud environment using `git clone https://github.com/TigerGraph-DevLabs/TigerGraph_Northwinds.git`
 - Navigate into the **Python** directory `cd ./Python`
 - Start the notebook with `jupyter notebook setup.ipynb`
